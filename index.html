@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<head>
+<title>Поле чудес </title>
+<script type="text/javascript" src="Winwheel.js"></script>
+<script src="TweenMax.min.js"></script>
+<style type="text/css">
+html,body,#wrapper{margin:0;padding:0;width:100%;height:100%;}
+body{font-family:arial, helvetica, sans-serif;}
+
+.the_wheel
+{
+	cursor:pointer;
+	display:inline-block;
+	margin:0 auto;
+    background-image: url(./wheel_back.png);
+	width:437px;
+	height:485px; overflow:hidden;
+}
+
+#canvas{margin-top:51px;}
+
+#text{display:none; position:fixed; color:white; justify-content:center; background-color: rgba(0, 0, 0, 0.5); width:250px; padding:20px; top:235px; font-size:28px; left:calc(50% - 145px); margin:0 auto; border-radius:35px; cursor:pointer;}
+
+.circle {
+	position: fixed;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 70px;
+	height: 70px;
+	box-shadow: 0px 0px 7px 0px rgba(34, 60, 80, 0.8);
+	border:2px solid black;
+	cursor:pointer;
+	user-select:none;
+}
+
+.label {
+	text-align: center;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	color:white;
+	font-weight:bold;
+}
+
+#container{float:left; width:calc(100% - 330px); height:100%; background-repeat:no-repeat; background-size:contain; background-color:green;}
+#settings{float:left; height:calc(100% - 20px); padding:10px; border-left:1px dashed gray; width:300px; overflow:hidden; font-size:18px;}
+
+input[type=text],input[type=button],input[type=submit],textarea,select,button{padding:5px; margin:10px 2px; border:1px solid #c2c2c2;}
+input[type=text]:focus,textarea:focus,select:focus{border:1px solid #686868;}
+
+#authors{font-size:12px; color:#d8d8d8;}
+#authors a{color:#d8d8d8;}
+</style>
+<script type="text/javascript">
+function convertStringToNumbers(str) {
+   let numbers = [];
+   for (let i = 0; i < str.length; i++)
+      numbers.push(str.charCodeAt(i));
+   return numbers;
+}
+
+function convertNumbersToString(numbers) {
+   let str = '';
+   for (let i = 0; i < numbers.length; i++)
+      str += String.fromCharCode(numbers[i]);
+   return str;
+}
+
+function changeSize(n) {
+	circleSize = parseInt(n);
+	document.getElementById('circleSize').innerHTML = circleSize;
+	document.getElementsByClassName('the_wheel')[0].setAttribute('style', 'transform: translate(0, 0) rotateX(' + circleSize + 'deg);');
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+	if (localStorage.getItem('word') != null)
+		document.getElementById('word').value = localStorage.getItem('word');	
+	changeWord();
+	if (localStorage.getItem('baraban') != null)
+		document.getElementById('baraban').value = localStorage.getItem('baraban');
+	document.getElementById('authors').innerHTML += '<a target="_blank" href="https://t.me/' + convertNumbersToString([97, 49, 97, 110, 119, 97, 107, 101]) + '">' + convertNumbersToString([97, 49, 97, 110, 119, 97, 107, 101]) + '</a>';
+});
+</script>
+</head>
+<body>
+	<div id="wrapper">
+	<div id="container">
+		<div style="margin-top:120px; width:437px">
+			<div class="the_wheel" onclick="resetWheel(); powerSelected(2); startSpin();">
+				<canvas id="canvas" width="434" height="434">
+					<p style="{color: white}" align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
+				</canvas>
+			</div>
+			<div id="text" style="position:relative;left:0px;top:-250px;"></div>
+		</div>
+	</div>
+	<div id="settings">
+	
+Слово:<br>
+		<input type="text" id="word" placeholder="Слово" /> <button onclick="changeWord()">Изменить</button><br>
+		<br>
+		Барабан:<br>
+		<textarea id="baraban" rows="5" cols="30"></textarea><br>
+		<button onclick="createCells()">Создать</button>
+		<br><br>
+		Угол: <span id="circleSize">0</span><br>
+		<input type="range" min="0" max="70" value="" id="circleRange" oninput="changeSize(this.value)" />
+		<br><br>
+		<button onclick="audioSong.pause()">Стоп</button>
+		<button onclick="playSong('pole_letter_wrong.mp3')">Неверная буква</button>
+		<button onclick="playSong('pole_players.mp3')">Начало</button>
+		<button onclick="playSong('pole_cudes-60-seconds.mp3')">Ожидание 60 сек</button>
+		<button onclick="playSong('pole-win.mp3')">Победа</button>
+		<div style="height:1px; border-top:1px dashed gray; margin:10px auto; width:98%;"></div>
+		<div id="authors">Создатели: ChatGPT 3.5 и </div>
+	<script>
+		// Create new wheel object specifying the parameters at creation time.
+		let theWheel = new Winwheel({
+			'numSegments'  : 0,     // Specify number of segments.
+			'outerRadius'  : 212,   // Set outer radius so wheel fits inside the background.
+			'textFontSize' : 28,    // Set font size as desired.
+			'segments'     :        // Define segments including colour and text.
+			[
+			   /*{'fillStyle' : '#fcfcfe', 'text' : 'Prize 1'},
+			   {'fillStyle' : '#405fc6', 'text' : 'Prize 2'},
+			   {'fillStyle' : '#fcfcfe', 'text' : 'Prize 3'},
+			   {'fillStyle' : '#405fc6', 'text' : 'Prize 4'},
+			   {'fillStyle' : '#fcfcfe', 'text' : 'Prize 5'},
+			   {'fillStyle' : '#405fc6', 'text' : 'Prize 6'},
+			   {'fillStyle' : '#fcfcfe', 'text' : 'Prize 7'},
+			   {'fillStyle' : '#405fc6', 'text' : 'Prize 8'}
+			   {'fillStyle' : '#405fc6', 'text' : 'Prize 8'}*/
+			],
+			'animation' :           // Specify the animation to use.
+			{
+				'type'     : 'spinToStop',
+				'duration' : 10,
+				'spins'    : 8,
+				'callbackFinished' : alertPrize,
+				'callbackSound'    : playSound,   // Function to call when the tick sound is to be triggered.
+				'soundTrigger'     : 'pin'        // Specify pins are to trigger the sound, the other option is 'segment'.
+			},
+			'pins' :
+			{
+				'number' : 16   // Number of pins. They space evenly around the wheel.
+			}
+		});
+
+		// -----------------------------------------------------------------
+		// This function is called when the segment under the prize pointer changes
+		// we can play a small tick sound here like you would expect on real prizewheels.
+		// -----------------------------------------------------------------
+		let audio = new Audio('audio/tick.mp3');  // Create audio object and load tick.mp3 file.
+		let audio2 = new Audio('audio/end.mp3');  // Create audio object and load tick.mp3 file.
+		let audio3 = new Audio('audio/baraban_1995_hq.mp3');  // Create audio object and load tick.mp3 file.
+		let audio4 = new Audio('audio/pole_letter_correct.mp3');  // Create audio object and load tick.mp3 file.
+		
+		let audioSong = new Audio();
+
+		function playSong(FileName)
+		{
+			audioSong.src = 'audio/' + FileName;
+			audioSong.pause();
+			audioSong.currentTime = 0;
+			audioSong.play();
+		}
+
+		function playSound()
+		{
+			// Stop and rewind the sound if it already happens to be playing.
+			audio.pause();
+			audio.currentTime = 0;
+
+			// Play the sound.
+			audio.play();
+		}
+
+		// -------------------------------------------------------
+		// Called when the spin animation has finished by the callback feature of the wheel because I specified callback in the parameters
+		// note the indicated segment is passed in as a parmeter as 99% of the time you will want to know this to inform the user of their prize.
+		// -------------------------------------------------------
+		function alertPrize(indicatedSegment)
+		{
+		
+			// Do basic alert of the segment text.
+			// You would probably want to do something more interesting with this information.
+			//alert("You have won " + indicatedSegment.text);
+			document.getElementById('text').style.display='flex';
+			document.getElementById('text').innerHTML=indicatedSegment.text;
+			audio2.pause();
+			audio2.currentTime = 0;
+
+			// Play the sound.
+			audio2.play();
+			
+			audio3.pause();
+			audio3.currentTime = 0;
+		}
+
+		// =======================================================================================================================
+		// Code below for the power controls etc which is entirely optional. You can spin the wheel simply by
+		// calling theWheel.startAnimation();
+		// =======================================================================================================================
+		let wheelPower    = 0;
+		let wheelSpinning = false;
+
+		// -------------------------------------------------------
+		// Function to handle the onClick on the power buttons.
+		// -------------------------------------------------------
+		function powerSelected(powerLevel)
+		{
+			// Ensure that power can't be changed while wheel is spinning.
+			if (wheelSpinning == false) {
+				// Reset all to grey incase this is not the first time the user has selected the power.
+				//document.getElementById('pw1').className = "";
+				//document.getElementById('pw2').className = "";
+				//document.getElementById('pw3').className = "";
+
+				// Now light up all cells below-and-including the one selected by changing the class.
+				/*if (powerLevel >= 1) {
+					document.getElementById('pw1').className = "pw1";
+				}
+
+				if (powerLevel >= 2) {
+					document.getElementById('pw2').className = "pw2";
+				}
+
+				if (powerLevel >= 3) {
+					document.getElementById('pw3').className = "pw3";
+				}*/
+
+				// Set wheelPower var used when spin button is clicked.
+				wheelPower = powerLevel;
+
+				// Light up the spin button by changing it's source image and adding a clickable class to it.
+				//document.getElementById('spin_button').src = "spin_on.png";
+				//document.getElementById('spin_button').className = "clickable";
+			}
+		}
+
+		// -------------------------------------------------------
+		// Click handler for spin button.
+		// -------------------------------------------------------
+		function startSpin()
+		{
+			audio2.pause();
+			audio3.currentTime = 0;
+			audio3.play();
+
+			theWheel.segments.push({'fillStyle' : '#fcfcfe', 'text' : 'Prize 1555'});
+			theWheel.segments.push({'fillStyle' : '#fcfcfe', 'text' : 'Prize 2555'});
+			theWheel.draw();
+			// Ensure that spinning can't be clicked again while already running.
+			if (wheelSpinning == false) {
+				// Based on the power level selected adjust the number of spins for the wheel, the more times is has
+				// to rotate with the duration of the animation the quicker the wheel spins.
+				if (wheelPower == 1) {
+					theWheel.animation.spins = 3;
+				} else if (wheelPower == 2) {
+					theWheel.animation.spins = 8;
+				} else if (wheelPower == 3) {
+					theWheel.animation.spins = 15;
+				}
+
+				// Disable the spin button so can't click again while wheel is spinning.
+				//document.getElementById('spin_button').src       = "spin_off.png";
+				//document.getElementById('spin_button').className = "";
+
+				// Begin the spin animation by calling startAnimation on the wheel object.
+				theWheel.startAnimation();
+
+				// Set to true so that power can't be changed and spin button re-enabled during
+				// the current animation. The user will have to reset before spinning again.
+				wheelSpinning = true;
+			}
+		}
+
+		// -------------------------------------------------------
+		// Function for reset button.
+		// -------------------------------------------------------
+		function resetWheel()
+		{
+			theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
+			theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
+			theWheel.draw();                // Call draw to render changes to the wheel.
+			document.getElementById('text').style.display='none';
+
+			wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+		}
+		
+		let colors = ['#fcfcfe', '#405fc6'];
+		function createCells() {
+			let inputText = document.getElementById('baraban').value;
+			localStorage.setItem('baraban', inputText);
+			let lines = inputText.split('\n');
+			
+			for (let i = 0; i < lines.length; i++) {
+				if (lines[i].trim() == '') continue;
+		
+				theWheel.addSegment({'text' : lines[i], 'fillStyle' : colors[i % colors.length]}, 1);
+				//
+			}
+
+			// The draw method of the wheel object must be called to render the changes.
+			theWheel.draw();
+		}
+		
+		function clearCells() {
+			for (let i = 0; i < theWheel.segments.length; i++)
+				theWheel.deleteSegment();
+			theWheel.draw();
+		}
+		
+
+		function hideClick(e) {
+			audio4.pause();
+			audio4.currentTime = 0;
+			audio4.play();
+			
+			if (e.children[0].style.color == 'blue')
+				e.children[0].style.color = 'white';
+			else
+				e.children[0].style.color = 'blue';
+		}
+		
+		function createCircle(label, counter) {
+			let circle = document.createElement('div');
+			circle.classList.add('circle');
+			circle.style.backgroundColor = 'blue';
+			circle.style.width = '60px';
+			circle.style.height = '60px';
+			circle.style.fontSize = 26 + 'px';
+
+			circle.style.top = '10px';
+			circle.style.left = 20 + counter * 70 + 'px';
+
+			let labelDiv = document.createElement('div');
+			labelDiv.classList.add('label');
+			labelDiv.innerText = label;
+			labelDiv.style.color = 'blue';
+
+			circle.setAttribute('onclick', 'hideClick(this)');
+			
+			circle.appendChild(labelDiv);
+			document.getElementById('container').appendChild(circle);
+		}
+		
+		function changeWord() {
+			
+			let circles = document.getElementsByClassName('circle');
+			// Удаление
+			for (let i = circles.length - 1; i >= 0; i--)
+					document.getElementsByClassName('circle')[i].remove();
+		
+			let word = document.getElementById('word').value;
+			localStorage.setItem('word', word);
+			for (let i = 0; i < word.length; i++)
+				createCircle(word[i], i);
+		}
+	</script>
+	</div>
+</body>
+</html>
