@@ -76,6 +76,43 @@ function changeSize(n) {
 	document.getElementsByClassName('the_wheel')[0].setAttribute('style', 'transform: translate(0, 0) rotateX(' + circleSize + 'deg);');
 }
 
+let curPlayerIndex = -1;
+let players = [];
+let initPlayers = false;
+
+function setPlayers() {
+	players = [];
+	let inputText = document.getElementById('players').value;
+	let lines = inputText.split('\n');
+
+	let circles = document.getElementsByClassName('circle');
+	
+	// Создание и добавление
+	for (let i = 0; i < lines.length; i++) {
+		if (lines[i].trim() == '') continue;
+		players.push(lines[i]);
+	}
+}
+
+function nextPlayer() {
+	if (initPlayers == false) setPlayers();
+	if (curPlayerIndex > players.length - 2)
+		curPlayerIndex = 0;
+	else
+		curPlayerIndex++;
+
+	document.getElementById('curPlayer').innerHTML = players[curPlayerIndex];
+}
+
+function prevPlayer() {
+	if (initPlayers == false) setPlayers();
+	if (curPlayerIndex < 1)
+		curPlayerIndex = players.length - 1;
+	else
+		curPlayerIndex--;
+	document.getElementById('curPlayer').innerHTML = players[curPlayerIndex];
+}
+
 document.addEventListener("DOMContentLoaded", function(){
 	if (localStorage.getItem('word') != null)
 		document.getElementById('word').value = localStorage.getItem('word');	
@@ -106,6 +143,12 @@ document.addEventListener("DOMContentLoaded", function(){
 		Барабан:<br>
 		<textarea id="baraban" rows="5" cols="30"></textarea><br>
 		<button onclick="createCells()">Создать</button>
+		<br><br>
+		Игроки:<br>
+		<textarea id="players" oninput="setPlayers()" rows="5" cols="30"></textarea><br>
+		Игрок: <span style="font-weight:bold" id="curPlayer">-</span><br>
+		<button onclick="nextPlayer()">Следующий</button>
+		<button onclick="prevPlayer()">Вернуть прошлого игрока</button>
 		<br><br>
 		Угол: <span id="circleSize">0</span><br>
 		<input type="range" min="0" max="70" value="" id="circleRange" oninput="changeSize(this.value)" />
