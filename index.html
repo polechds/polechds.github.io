@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function(){
 		<button onclick="playSong('pole_players.mp3')">Начало</button>
 		<button onclick="playSong('pole_cudes-60-seconds.mp3')">Ожидание 60 сек</button>
 		<button onclick="playSong('pole-win.mp3')">Победа</button><br>
-		Громкость: <span id="volume">100%</span><br>
+		Громкость мелодий: <span id="volume">100%</span><br>
 		<input type="range" min="0" max="10" value="10" id="volumeRange" oninput="document.getElementById('volume').innerHTML = this.value * 10 + '%'; audioSong.volume = this.value * 0.1" /><br>
 		Громкость барабана: <span id="volume2">100%</span><br>
 		<input type="range" min="0" max="10" value="10" id="volumeRange2" oninput="document.getElementById('volume2').innerHTML = this.value * 10 + '%'; audio3.volume = this.value * 0.1" /><br>
