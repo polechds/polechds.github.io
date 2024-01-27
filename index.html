@@ -49,7 +49,7 @@ body{font-family:arial, helvetica, sans-serif;}
 #container{float:left; width:calc(100% - 330px); height:100%; background-repeat:no-repeat; background-size:contain; background-color:green;}
 #settings{float:left; height:calc(100% - 20px); padding:10px; border-left:1px dashed gray; width:300px; overflow:hidden; font-size:18px;}
 
-input[type=text],input[type=button],input[type=submit],textarea,select,button{padding:5px; margin:10px 2px; border:1px solid #c2c2c2;}
+input[type=text],input[type=button],input[type=submit],textarea,select,button{padding:5px; margin:5px 2px; border:1px solid #c2c2c2;}
 input[type=text]:focus,textarea:focus,select:focus{border:1px solid #686868;}
 
 #authors{font-size:12px; color:#d8d8d8;}
@@ -113,13 +113,21 @@ function prevPlayer() {
 	document.getElementById('curPlayer').innerHTML = players[curPlayerIndex];
 }
 
+function resetCells() {
+	document.getElementById('baraban').value = '100\n200\n300\n400\n500\nПриз\n0\nПерех. хода';
+}
+
 document.addEventListener("DOMContentLoaded", function(){
 	if (localStorage.getItem('word') != null)
 		document.getElementById('word').value = localStorage.getItem('word');	
 	changeWord();
 	if (localStorage.getItem('baraban') != null)
 		document.getElementById('baraban').value = localStorage.getItem('baraban');
+	else
+		document.getElementById('baraban').value = '100\n200\n300\n400\n500\nПриз\n0\nПерех. хода';
+	createCells();
 	document.getElementById('authors').innerHTML += '<a target="_blank" href="https://t.me/' + convertNumbersToString([97, 49, 97, 110, 119, 97, 107, 101]) + '">' + convertNumbersToString([97, 49, 97, 110, 119, 97, 107, 101]) + '</a>';
+	document.getElementById('volume').innerHTML = document.getElementById('volumeRange').value * 10 + '%';
 });
 </script>
 </head>
@@ -132,34 +140,38 @@ document.addEventListener("DOMContentLoaded", function(){
 					<p style="{color: white}" align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
 				</canvas>
 			</div>
-			<div id="text" style="position:relative;left:0px;top:-250px;"></div>
+			<div id="text" style="position:relative;left:0px;top:-250px;" onclick="resetWheel(); powerSelected(2); startSpin();"></div>
 		</div>
 	</div>
 	<div id="settings">
 	
 Слово:<br>
 		<input type="text" id="word" placeholder="Слово" /> <button onclick="changeWord()">Изменить</button><br>
-		<br>
 		Барабан:<br>
 		<textarea id="baraban" rows="5" cols="30"></textarea><br>
-		<button onclick="createCells()">Создать</button>
-		<br><br>
+		<button onclick="createCells()">Создать / Обновить</button><button onclick="resetCells()">Сбросить</button>
+		<br>
 		Игроки:<br>
 		<textarea id="players" oninput="setPlayers()" rows="5" cols="30"></textarea><br>
 		Игрок: <span style="font-weight:bold" id="curPlayer">-</span><br>
-		<button onclick="nextPlayer()">Следующий</button>
-		<button onclick="prevPlayer()">Вернуть прошлого игрока</button>
-		<br><br>
+		<button onclick="nextPlayer()">Следующий</button><button onclick="prevPlayer()">Вернуть прошлого игрока</button>
+		<br>
 		Угол: <span id="circleSize">0</span><br>
 		<input type="range" min="0" max="70" value="" id="circleRange" oninput="changeSize(this.value)" />
-		<br><br>
+		<br>Звуки:<br>
 		<button onclick="audioSong.pause()">Стоп</button>
 		<button onclick="playSong('pole_letter_wrong.mp3')">Неверная буква</button>
 		<button onclick="playSong('pole_players.mp3')">Начало</button>
 		<button onclick="playSong('pole_cudes-60-seconds.mp3')">Ожидание 60 сек</button>
-		<button onclick="playSong('pole-win.mp3')">Победа</button>
+		<button onclick="playSong('pole-win.mp3')">Победа</button><br>
+		Громкость: <span id="volume">100%</span><br>
+		<input type="range" min="0" max="10" value="10" id="volumeRange" oninput="document.getElementById('volume').innerHTML = this.value * 10 + '%'; audioSong.volume = this.value * 0.1" /><br>
+		Громкость барабана: <span id="volume2">100%</span><br>
+		<input type="range" min="0" max="10" value="10" id="volumeRange2" oninput="document.getElementById('volume2').innerHTML = this.value * 10 + '%'; audio3.volume = this.value * 0.1" /><br>
+		Громкость эффектов: <span id="volume3">100%</span><br>
+		<input type="range" min="0" max="10" value="10" id="volumeRange3" oninput="document.getElementById('volume3').innerHTML = this.value * 10 + '%'; audio.volume = this.value * 0.1; audio2.volume = this.value * 0.1; audio4.volume = this.value * 0.1;" /><br>
 		<div style="height:1px; border-top:1px dashed gray; margin:10px auto; width:98%;"></div>
-		<div id="authors">Создатели: ChatGPT 3.5 и </div>
+		<div id="authors">Технологии & создатели: Winwheel, ChatGPT 3.5 и </div>
 	<script>
 		// Create new wheel object specifying the parameters at creation time.
 		let theWheel = new Winwheel({
@@ -181,8 +193,8 @@ document.addEventListener("DOMContentLoaded", function(){
 			'animation' :           // Specify the animation to use.
 			{
 				'type'     : 'spinToStop',
-				'duration' : 10,
-				'spins'    : 8,
+				'duration' : 9,
+				'spins'    : 7,
 				'callbackFinished' : alertPrize,
 				'callbackSound'    : playSound,   // Function to call when the tick sound is to be triggered.
 				'soundTrigger'     : 'pin'        // Specify pins are to trigger the sound, the other option is 'segment'.
@@ -209,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function(){
 			audioSong.src = 'audio/' + FileName;
 			audioSong.pause();
 			audioSong.currentTime = 0;
+			audioSong.volume = document.getElementById('volumeRange').value * 0.1;
 			audioSong.play();
 		}
 
@@ -292,6 +305,7 @@ document.addEventListener("DOMContentLoaded", function(){
 		{
 			audio2.pause();
 			audio3.currentTime = 0;
+			audio3.volume = document.getElementById('volumeRange2').value * 0.1;
 			audio3.play();
 
 			theWheel.segments.push({'fillStyle' : '#fcfcfe', 'text' : 'Prize 1555'});
@@ -337,6 +351,7 @@ document.addEventListener("DOMContentLoaded", function(){
 		
 		let colors = ['#fcfcfe', '#405fc6'];
 		function createCells() {
+			clearCells();
 			let inputText = document.getElementById('baraban').value;
 			localStorage.setItem('baraban', inputText);
 			let lines = inputText.split('\n');
@@ -354,8 +369,7 @@ document.addEventListener("DOMContentLoaded", function(){
 		
 		function clearCells() {
 			for (let i = 0; i < theWheel.segments.length; i++)
-				theWheel.deleteSegment();
-			theWheel.draw();
+				theWheel.deleteSegment(); // поправил библиотеку, не удалялся первый object
 		}
 		
 
